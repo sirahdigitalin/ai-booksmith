@@ -36,8 +36,47 @@ const HowItWorks = () => (
       </motion.div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 relative">
-        {/* Connecting line */}
-        <div className="hidden lg:block absolute top-12 left-[12%] right-[12%] h-0.5 bg-gradient-to-r from-primary via-accent to-secondary opacity-20" />
+        {/* Dynamic curved connecting line */}
+        <svg
+          className="hidden lg:block absolute top-12 left-[10%] right-[10%] w-[80%] h-24 -translate-y-4 z-0"
+          viewBox="0 0 800 80"
+          fill="none"
+          preserveAspectRatio="none"
+        >
+          <motion.path
+            d="M 0,40 C 100,0 150,80 270,40 C 390,0 440,80 530,40 C 620,0 700,80 800,40"
+            stroke="url(#flowGradient)"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            fill="none"
+            initial={{ pathLength: 0, opacity: 0 }}
+            whileInView={{ pathLength: 1, opacity: 0.4 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.5, ease: "easeInOut" }}
+          />
+          {/* Animated dots along the path */}
+          <motion.circle
+            r="4"
+            fill="hsl(var(--primary))"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: [0, 1, 0] }}
+            viewport={{ once: true }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <animateMotion
+              dur="3s"
+              repeatCount="indefinite"
+              path="M 0,40 C 100,0 150,80 270,40 C 390,0 440,80 530,40 C 620,0 700,80 800,40"
+            />
+          </motion.circle>
+          <defs>
+            <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="hsl(var(--primary))" />
+              <stop offset="50%" stopColor="hsl(var(--accent))" />
+              <stop offset="100%" stopColor="hsl(var(--secondary))" />
+            </linearGradient>
+          </defs>
+        </svg>
 
         {steps.map((s, i) => {
           const c = colorMap[s.color];
