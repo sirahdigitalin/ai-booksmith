@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { PenLine, Wand2, BookOpen, Truck } from "lucide-react";
+import { useMemo } from "react";
 
 const steps = [
   { icon: PenLine, title: "Enter Details", desc: "Add a name, age, and pick a theme for your story.", color: "primary" as const },
@@ -9,15 +10,66 @@ const steps = [
 ];
 
 const colorMap = {
-  primary: { bg: "bg-primary/10", text: "text-primary", line: "bg-primary" },
-  accent: { bg: "bg-accent/10", text: "text-accent", line: "bg-accent" },
-  secondary: { bg: "bg-secondary/10", text: "text-secondary", line: "bg-secondary" },
+  primary: { bg: "bg-primary/10", text: "text-primary" },
+  accent: { bg: "bg-accent/10", text: "text-accent" },
+  secondary: { bg: "bg-secondary/10", text: "text-secondary" },
+};
+
+const CURVE_PATH = "M 0,40 C 100,0 150,80 270,40 C 390,0 440,80 530,40 C 620,0 700,80 800,40";
+
+const Particles = () => {
+  const particles = useMemo(
+    () =>
+      Array.from({ length: 18 }, (_, i) => ({
+        id: i,
+        x: `${5 + Math.random() * 90}%`,
+        y: `${10 + Math.random() * 80}%`,
+        size: 3 + Math.random() * 5,
+        delay: Math.random() * 4,
+        dur: 3 + Math.random() * 4,
+        color: ["--primary", "--secondary", "--accent"][i % 3],
+      })),
+    []
+  );
+
+  return (
+    <>
+      {particles.map((p) => (
+        <motion.div
+          key={p.id}
+          className="absolute rounded-full pointer-events-none"
+          style={{
+            left: p.x,
+            top: p.y,
+            width: p.size,
+            height: p.size,
+            background: `hsl(var(${p.color}) / 0.25)`,
+          }}
+          initial={{ opacity: 0, y: 0 }}
+          animate={{
+            opacity: [0, 0.6, 0],
+            y: [0, -30, -60],
+            scale: [0.5, 1, 0.3],
+          }}
+          transition={{
+            duration: p.dur,
+            delay: p.delay,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </>
+  );
 };
 
 const HowItWorks = () => (
   <section id="how-it-works" className="py-28 bg-background relative overflow-hidden">
-    {/* Decorative */}
+    {/* Top border */}
     <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
+    {/* Floating particles */}
+    <Particles />
 
     <div className="container mx-auto px-4">
       <motion.div
@@ -44,7 +96,7 @@ const HowItWorks = () => (
           preserveAspectRatio="none"
         >
           <motion.path
-            d="M 0,40 C 100,0 150,80 270,40 C 390,0 440,80 530,40 C 620,0 700,80 800,40"
+            d={CURVE_PATH}
             stroke="url(#flowGradient)"
             strokeWidth="2.5"
             strokeLinecap="round"
@@ -54,7 +106,6 @@ const HowItWorks = () => (
             viewport={{ once: true }}
             transition={{ duration: 1.5, ease: "easeInOut" }}
           />
-          {/* Animated dots along the path */}
           <motion.circle
             r="4"
             fill="hsl(var(--primary))"
@@ -63,11 +114,7 @@ const HowItWorks = () => (
             viewport={{ once: true }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           >
-            <animateMotion
-              dur="3s"
-              repeatCount="indefinite"
-              path="M 0,40 C 100,0 150,80 270,40 C 390,0 440,80 530,40 C 620,0 700,80 800,40"
-            />
+            <animateMotion dur="3s" repeatCount="indefinite" path={CURVE_PATH} />
           </motion.circle>
           <defs>
             <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
