@@ -12,7 +12,8 @@ serve(async (req) => {
   }
 
   try {
-    const { name, age, theme, occasion } = await req.json();
+    const { name, age, theme, occasion, pageCount = 5 } = await req.json();
+    const pages = Math.min(Math.max(Number(pageCount) || 5, 5), 30);
 
     if (!name || !age || !theme || !occasion) {
       return new Response(
