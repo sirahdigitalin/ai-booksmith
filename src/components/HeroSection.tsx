@@ -1,12 +1,17 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, ArrowRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import heroBook from "@/assets/hero-book-personalized.png";
-import childFace from "@/assets/sample-child-face.png";
+import childFace1 from "@/assets/sample-child-face.png";
+import childFace2 from "@/assets/sample-child-face-2.png";
+
+const childFaces = [childFace1, childFace2];
 
 const HeroSection = () => {
   const [animationPhase, setAnimationPhase] = useState<"idle" | "flying" | "landed" | "glow">("idle");
+  const faceIndexRef = useRef(0);
+  const [currentFace, setCurrentFace] = useState(childFaces[0]);
 
   useEffect(() => {
     const runCycle = () => {
