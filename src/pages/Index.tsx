@@ -5,6 +5,7 @@ import HowItWorks from "@/components/HowItWorks";
 import BookTypes from "@/components/BookTypes";
 import StoryCreator from "@/components/StoryCreator";
 import PricingSection from "@/components/PricingSection";
+import FAQSection from "@/components/FAQSection";
 import Footer from "@/components/Footer";
 import { BookTemplate } from "@/data/bookTemplates";
 
