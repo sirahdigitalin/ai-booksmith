@@ -5,8 +5,12 @@ import { Button } from "@/components/ui/button";
 const plans = [
   {
     name: "Digital PDF",
-    price: "₹299",
     icon: Download,
+    tiers: [
+      { pages: "10 Pages", price: "₹199" },
+      { pages: "20 Pages", price: "₹299" },
+      { pages: "30 Pages", price: "₹399" },
+    ],
     features: ["AI-generated story", "Custom illustrations", "High-res PDF download", "Instant delivery"],
     popular: false,
     gradient: "bg-card",
@@ -15,8 +19,12 @@ const plans = [
   },
   {
     name: "Printed Book",
-    price: "₹899",
     icon: BookOpen,
+    tiers: [
+      { pages: "10 Pages", price: "₹699" },
+      { pages: "20 Pages", price: "₹899" },
+      { pages: "30 Pages", price: "₹1,199" },
+    ],
     features: ["Everything in Digital", "Premium print quality", "Hard/soft cover options", "Free doorstep delivery", "Gift wrapping available"],
     popular: true,
     gradient: "bg-gradient-royal",
@@ -38,7 +46,7 @@ const PricingSection = () => (
         <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
           Simple, Transparent Pricing
         </h2>
-        <p className="text-muted-foreground text-lg">Download digitally or get it printed and delivered.</p>
+        <p className="text-muted-foreground text-lg">Choose your page count. Download digitally or get it printed.</p>
       </motion.div>
 
       <div className="grid sm:grid-cols-2 gap-8">
@@ -61,7 +69,22 @@ const PricingSection = () => (
             )}
             <p.icon size={36} className={p.popular ? "text-accent" : "text-primary"} />
             <h3 className="font-display text-2xl font-bold mt-4">{p.name}</h3>
-            <p className="text-4xl font-bold mt-2 font-accent">{p.price}</p>
+
+            {/* Page-based pricing tiers */}
+            <div className="mt-4 space-y-2">
+              {p.tiers.map((tier) => (
+                <div
+                  key={tier.pages}
+                  className={`flex items-center justify-between rounded-lg px-4 py-2.5 ${
+                    p.popular ? "bg-white/10" : "bg-muted/50"
+                  }`}
+                >
+                  <span className="text-sm font-accent font-medium">{tier.pages}</span>
+                  <span className="text-lg font-bold font-accent">{tier.price}</span>
+                </div>
+              ))}
+            </div>
+
             <ul className="mt-8 space-y-3">
               {p.features.map((f) => (
                 <li key={f} className="flex items-center gap-3 text-sm">
