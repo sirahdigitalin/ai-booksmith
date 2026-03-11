@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Rocket, Crown, Trees, Gift, Heart, Loader2, Camera, X, ImageIcon, MapPin, Phone, Mail, User } from "lucide-react";
+import { Sparkles, Rocket, Crown, Trees, Gift, Heart, Loader2, Camera, X, ImageIcon, MapPin, Phone, Mail, User, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import FlipbookPreview from "./FlipbookPreview";
+import { BookTemplate } from "@/data/bookTemplates";
 
 const themes = [
   { id: "space", label: "Space Adventure", icon: Rocket, color: "border-secondary text-secondary bg-secondary/5" },
@@ -32,11 +33,15 @@ export interface StoryPage {
 
 interface StoryCreatorProps {
   preselectedTheme?: string;
+  selectedTemplate?: BookTemplate;
 }
 
-// Steps: 0=Personal Info, 1=Theme, 2=Occasion+Pages, 3=Preview, 4=Order (address)
-const StoryCreator = ({ preselectedTheme }: StoryCreatorProps) => {
+const StoryCreator = ({ preselectedTheme, selectedTemplate }: StoryCreatorProps) => {
+  // Template flow: step 0 (details) → step 3 (preview) → step 4 (order)
+  // Custom AI flow: step 0 (details) → step 1 (theme) → step 2 (occasion+pages) → step 3 (preview) → step 4 (order)
   const [step, setStep] = useState(0);
+  const [isTemplateFlow, setIsTemplateFlow] = useState(false);
+  const [activeTemplate, setActiveTemplate] = useState<BookTemplate | null>(null);
   const [form, setForm] = useState({
     name: "", age: "", phone: "", email: "", theme: "", occasion: "", pageCount: 20,
     address: "", city: "", state: "", pincode: "",
@@ -50,9 +55,20 @@ const StoryCreator = ({ preselectedTheme }: StoryCreatorProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
+    if (selectedTemplate) {
+      setIsTemplateFlow(true);
+      setActiveTemplate(selectedTemplate);
+      setStep(0);
+      setStory(null);
+      setStoryTitle("");
+    }
+  }, [selectedTemplate]);
+
+  useEffect(() => {
     if (preselectedTheme && preselectedTheme !== form.theme) {
+      setIsTemplateFlow(false);
+      setActiveTemplate(null);
       setForm((prev) => ({ ...prev, theme: preselectedTheme }));
-      // Stay on step 0 so user fills in personal details first
     }
   }, [preselectedTheme]);
 
@@ -71,14 +87,28 @@ const StoryCreator = ({ preselectedTheme }: StoryCreatorProps) => {
   const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const isValidPhone = (phone: string) => /^[6-9]\d{9}$/.test(phone.replace(/\s/g, ""));
 
+  const canNextStep0 = form.name.trim() && form.age && form.phone && isValidPhone(form.phone) && form.email && isValidEmail(form.email);
   const canNext =
-    (step === 0 && form.name.trim() && form.age && form.phone && isValidPhone(form.phone) && form.email && isValidEmail(form.email)) ||
+    (step === 0 && canNextStep0) ||
     (step === 1 && form.theme) ||
     (step === 2 && form.occasion && form.pageCount);
 
   const canOrder =
     orderType === "pdf" ||
     (orderType === "print" && form.address.trim() && form.city.trim() && form.state.trim() && form.pincode.trim().length >= 5);
+
+  const personalizeTemplate = () => {
+    if (!activeTemplate) return;
+    const pages: StoryPage[] = activeTemplate.storyTemplate.map((p) => ({
+      pageNumber: p.pageNumber,
+      text: p.text.replace(/{name}/g, form.name).replace(/{age}/g, form.age),
+      illustration: p.illustration,
+    }));
+    setStoryTitle(`${form.name}'s ${activeTemplate.title}`);
+    setStory(pages);
+    setForm((prev) => ({ ...prev, pageCount: activeTemplate.pageCount }));
+    setStep(3);
+  };
 
   const generateStory = async () => {
     setGenerating(true);
@@ -151,7 +181,17 @@ const StoryCreator = ({ preselectedTheme }: StoryCreatorProps) => {
     setStoryTitle("");
     setPhoto(null);
     setOrderType(null);
+    setIsTemplateFlow(false);
+    setActiveTemplate(null);
     setForm({ name: "", age: "", phone: "", email: "", theme: "", occasion: "", pageCount: 20, address: "", city: "", state: "", pincode: "" });
+  };
+
+  const handleNextFromDetails = () => {
+    if (isTemplateFlow && activeTemplate) {
+      personalizeTemplate();
+    } else {
+      setStep(1);
+    }
   };
 
   // Step 3: Book preview
@@ -159,6 +199,21 @@ const StoryCreator = ({ preselectedTheme }: StoryCreatorProps) => {
     return (
       <section id="create-your-book" className="py-28 bg-background">
         <div className="container mx-auto px-4">
+          {/* Flow indicator */}
+          <div className="text-center mb-6">
+            <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-accent font-semibold ${
+              isTemplateFlow
+                ? "bg-secondary/10 text-secondary border border-secondary/20"
+                : "bg-primary/10 text-primary border border-primary/20"
+            }`}>
+              {isTemplateFlow ? (
+                <><BookOpen size={12} /> Template: {activeTemplate?.title}</>
+              ) : (
+                <><Sparkles size={12} /> Custom AI Story</>
+              )}
+            </span>
+          </div>
+
           <FlipbookPreview title={storyTitle} pages={story} characterName={form.name} />
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
             <Button
@@ -166,14 +221,14 @@ const StoryCreator = ({ preselectedTheme }: StoryCreatorProps) => {
               className="bg-gradient-royal text-secondary-foreground font-semibold font-accent px-8"
               size="lg"
             >
-              Download PDF — {pageOptions.find(o => o.pages === form.pageCount)?.pdfPrice}
+              Download PDF — {pageOptions.find(o => o.pages === form.pageCount)?.pdfPrice || "₹199"}
             </Button>
             <Button
               onClick={() => { setOrderType("print"); setStep(4); }}
               className="bg-gradient-crimson text-primary-foreground font-semibold font-accent px-8 shadow-glow-red"
               size="lg"
             >
-              Order Printed Book — {pageOptions.find(o => o.pages === form.pageCount)?.printPrice}
+              Order Printed Book — {pageOptions.find(o => o.pages === form.pageCount)?.printPrice || "₹699"}
             </Button>
           </div>
           <div className="text-center mt-4">
@@ -188,7 +243,7 @@ const StoryCreator = ({ preselectedTheme }: StoryCreatorProps) => {
 
   // Step 4: Order & Address
   if (step === 4 && story) {
-    const selectedPlan = pageOptions.find(o => o.pages === form.pageCount);
+    const selectedPlan = pageOptions.find(o => o.pages === form.pageCount) || pageOptions[0];
     return (
       <section id="create-your-book" className="py-28 bg-background">
         <div className="container mx-auto px-4 max-w-lg">
@@ -200,7 +255,7 @@ const StoryCreator = ({ preselectedTheme }: StoryCreatorProps) => {
               {orderType === "print" ? "Where should we deliver?" : "Get Your Digital Copy"}
             </h2>
             <p className="text-muted-foreground text-sm">
-              {storyTitle} · {form.pageCount} pages · {orderType === "print" ? selectedPlan?.printPrice : selectedPlan?.pdfPrice}
+              {storyTitle} · {form.pageCount} pages · {orderType === "print" ? selectedPlan.printPrice : selectedPlan.pdfPrice}
             </p>
           </motion.div>
 
@@ -214,12 +269,9 @@ const StoryCreator = ({ preselectedTheme }: StoryCreatorProps) => {
                     <MapPin size={14} className="text-primary" /> Delivery Address
                   </Label>
                   <Textarea
-                    id="address"
-                    placeholder="House/Flat No, Street, Landmark"
-                    value={form.address}
-                    onChange={(e) => setForm({ ...form, address: e.target.value })}
-                    className="mt-2"
-                    rows={3}
+                    id="address" placeholder="House/Flat No, Street, Landmark"
+                    value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })}
+                    className="mt-2" rows={3}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -236,13 +288,11 @@ const StoryCreator = ({ preselectedTheme }: StoryCreatorProps) => {
                   <Label htmlFor="pincode" className="font-accent font-semibold">PIN Code</Label>
                   <Input id="pincode" placeholder="e.g. 600001" value={form.pincode} onChange={(e) => setForm({ ...form, pincode: e.target.value.replace(/\D/g, "").slice(0, 6) })} className="mt-2 h-11" />
                 </div>
-
-                {/* Summary */}
                 <div className="mt-6 p-4 rounded-xl bg-muted/50 border border-border/50">
                   <p className="text-sm font-accent font-semibold text-foreground mb-2">Order Summary</p>
                   <div className="flex justify-between text-sm text-muted-foreground">
                     <span>{storyTitle} ({form.pageCount} pages)</span>
-                    <span className="font-bold text-foreground">{selectedPlan?.printPrice}</span>
+                    <span className="font-bold text-foreground">{selectedPlan.printPrice}</span>
                   </div>
                   <div className="flex justify-between text-sm text-muted-foreground mt-1">
                     <span>Delivery</span>
@@ -258,7 +308,7 @@ const StoryCreator = ({ preselectedTheme }: StoryCreatorProps) => {
                   Your {form.pageCount}-page book will be sent to <strong>{form.email}</strong>
                 </p>
                 <div className="p-4 rounded-xl bg-muted/50 border border-border/50 inline-block">
-                  <span className="text-2xl font-bold font-accent text-foreground">{selectedPlan?.pdfPrice}</span>
+                  <span className="text-2xl font-bold font-accent text-foreground">{selectedPlan.pdfPrice}</span>
                 </div>
               </div>
             )}
@@ -283,7 +333,9 @@ const StoryCreator = ({ preselectedTheme }: StoryCreatorProps) => {
   }
 
   // Steps 0-2: Form wizard
-  const stepLabels = ["Details", "Theme", "Occasion"];
+  const isCustomFlow = !isTemplateFlow;
+  const totalSteps = isTemplateFlow ? 1 : 3;
+  const stepLabels = isTemplateFlow ? ["Details"] : ["Details", "Theme", "Occasion"];
 
   return (
     <section id="create-your-book" className="py-28 bg-background relative overflow-hidden">
@@ -294,18 +346,37 @@ const StoryCreator = ({ preselectedTheme }: StoryCreatorProps) => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          className="text-center mb-6"
         >
           <span className="text-sm font-accent font-semibold text-primary uppercase tracking-widest mb-3 block">Story Creator</span>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
             Create Your Book
           </h2>
-          <p className="text-muted-foreground text-lg">Just 3 quick steps to your personalized story.</p>
+          <p className="text-muted-foreground text-lg">
+            {isTemplateFlow
+              ? `Personalizing "${activeTemplate?.title}" — just enter your details!`
+              : "Just 3 quick steps to your personalized story."}
+          </p>
         </motion.div>
+
+        {/* Flow indicator */}
+        <div className="text-center mb-8">
+          <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-accent font-semibold ${
+            isTemplateFlow
+              ? "bg-secondary/10 text-secondary border border-secondary/20"
+              : "bg-primary/10 text-primary border border-primary/20"
+          }`}>
+            {isTemplateFlow ? (
+              <><BookOpen size={12} /> Template: {activeTemplate?.title}</>
+            ) : (
+              <><Sparkles size={12} /> Custom AI Story</>
+            )}
+          </span>
+        </div>
 
         {/* Progress */}
         <div className="flex items-center justify-center gap-2 mb-12">
-          {[0, 1, 2].map((s) => (
+          {Array.from({ length: totalSteps }).map((_, s) => (
             <div key={s} className="flex items-center gap-2">
               <div className="flex flex-col items-center gap-1">
                 <div
@@ -319,17 +390,14 @@ const StoryCreator = ({ preselectedTheme }: StoryCreatorProps) => {
                 </div>
                 <span className="text-xs text-muted-foreground font-accent hidden sm:block">{stepLabels[s]}</span>
               </div>
-              {s < 2 && (
+              {s < totalSteps - 1 && (
                 <div className={`w-12 sm:w-16 h-1 rounded-full transition-colors duration-300 mb-4 sm:mb-5 ${step > s ? "bg-primary" : "bg-muted"}`} />
               )}
             </div>
           ))}
         </div>
 
-        <motion.div
-          layout
-          className="bg-card rounded-2xl shadow-card p-8 border border-border/50"
-        >
+        <motion.div layout className="bg-card rounded-2xl shadow-card p-8 border border-border/50">
           <AnimatePresence mode="wait">
             {step === 0 && (
               <motion.div key="s0" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
@@ -354,9 +422,7 @@ const StoryCreator = ({ preselectedTheme }: StoryCreatorProps) => {
                         <Phone size={13} className="text-primary" /> Phone Number
                       </Label>
                       <Input
-                        id="phone"
-                        type="tel"
-                        placeholder="e.g. 9876543210"
+                        id="phone" type="tel" placeholder="e.g. 9876543210"
                         value={form.phone}
                         onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
                         className="mt-2 h-12"
@@ -370,9 +436,7 @@ const StoryCreator = ({ preselectedTheme }: StoryCreatorProps) => {
                         <Mail size={13} className="text-primary" /> Email
                       </Label>
                       <Input
-                        id="email"
-                        type="email"
-                        placeholder="e.g. name@email.com"
+                        id="email" type="email" placeholder="e.g. name@email.com"
                         value={form.email}
                         onChange={(e) => setForm({ ...form, email: e.target.value })}
                         className="mt-2 h-12"
@@ -389,13 +453,7 @@ const StoryCreator = ({ preselectedTheme }: StoryCreatorProps) => {
                       <Camera size={13} className="text-primary" /> Upload Photo <span className="text-muted-foreground font-normal">(optional)</span>
                     </Label>
                     <p className="text-xs text-muted-foreground mt-1 mb-3">Add a photo to personalize the story character's look.</p>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handlePhotoUpload}
-                      className="hidden"
-                    />
+                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
                     {photo ? (
                       <div className="relative inline-block">
                         <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-primary shadow-card">
@@ -427,7 +485,7 @@ const StoryCreator = ({ preselectedTheme }: StoryCreatorProps) => {
               </motion.div>
             )}
 
-            {step === 1 && (
+            {step === 1 && isCustomFlow && (
               <motion.div key="s1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                 <h3 className="font-display text-xl font-bold mb-6 text-foreground">Pick a Theme</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -449,7 +507,7 @@ const StoryCreator = ({ preselectedTheme }: StoryCreatorProps) => {
               </motion.div>
             )}
 
-            {step === 2 && (
+            {step === 2 && isCustomFlow && (
               <motion.div key="s2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                 <h3 className="font-display text-xl font-bold mb-6 text-foreground">What's the Occasion?</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -503,7 +561,23 @@ const StoryCreator = ({ preselectedTheme }: StoryCreatorProps) => {
             >
               Back
             </Button>
-            {step < 2 ? (
+
+            {step === 0 ? (
+              <Button
+                onClick={handleNextFromDetails}
+                disabled={!canNextStep0}
+                className={isTemplateFlow
+                  ? "bg-gradient-crimson text-primary-foreground font-semibold font-accent px-6 shadow-glow-red hover:shadow-elevated transition-all"
+                  : "bg-gradient-royal text-secondary-foreground font-semibold font-accent px-6"
+                }
+              >
+                {isTemplateFlow ? (
+                  <><Sparkles size={16} className="mr-2" /> Generate Preview</>
+                ) : (
+                  <>Next →</>
+                )}
+              </Button>
+            ) : step < 2 ? (
               <Button
                 onClick={() => setStep(step + 1)}
                 disabled={!canNext}
