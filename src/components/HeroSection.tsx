@@ -15,6 +15,8 @@ const HeroSection = () => {
 
   useEffect(() => {
     const runCycle = () => {
+      setCurrentFace(childFaces[faceIndexRef.current]);
+      faceIndexRef.current = (faceIndexRef.current + 1) % childFaces.length;
       setAnimationPhase("idle");
       setTimeout(() => setAnimationPhase("flying"), 800);
       setTimeout(() => setAnimationPhase("landed"), 2000);
