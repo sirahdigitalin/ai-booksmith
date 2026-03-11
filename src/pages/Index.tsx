@@ -31,6 +31,7 @@ const Index = () => {
       <BookTypes onSelectTheme={handleSelectTheme} onSelectTemplate={handleSelectTemplate} />
       <StoryCreator preselectedTheme={selectedTheme} selectedTemplate={selectedTemplate} />
       <PricingSection />
+      <FAQSection />
       <Footer />
     </div>
   );
