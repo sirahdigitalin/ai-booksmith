@@ -1,15 +1,22 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, ArrowRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import heroBook from "@/assets/hero-book-personalized.png";
-import childFace from "@/assets/sample-child-face.png";
+import childFace1 from "@/assets/sample-child-face.png";
+import childFace2 from "@/assets/sample-child-face-2.png";
+
+const childFaces = [childFace1, childFace2];
 
 const HeroSection = () => {
   const [animationPhase, setAnimationPhase] = useState<"idle" | "flying" | "landed" | "glow">("idle");
+  const faceIndexRef = useRef(0);
+  const [currentFace, setCurrentFace] = useState(childFaces[0]);
 
   useEffect(() => {
     const runCycle = () => {
+      setCurrentFace(childFaces[faceIndexRef.current]);
+      faceIndexRef.current = (faceIndexRef.current + 1) % childFaces.length;
       setAnimationPhase("idle");
       setTimeout(() => setAnimationPhase("flying"), 800);
       setTimeout(() => setAnimationPhase("landed"), 2000);
@@ -146,7 +153,7 @@ const HeroSection = () => {
                 >
                   <div className="relative">
                     <div className="w-20 h-20 rounded-full border-[3px] border-accent shadow-card overflow-hidden bg-background">
-                      <img src={childFace} alt="Child's photo" className="w-full h-full object-cover" />
+                      <img src={currentFace} alt="Child's photo" className="w-full h-full object-cover" />
                     </div>
                     {/* Arrow indicator */}
                     <motion.div
@@ -184,7 +191,7 @@ const HeroSection = () => {
                   className="absolute z-20"
                 >
                   <div className="w-20 h-20 rounded-full border-[3px] border-accent shadow-glow-red overflow-hidden bg-background">
-                    <img src={childFace} alt="Child's photo" className="w-full h-full object-cover" />
+                    <img src={currentFace} alt="Child's photo" className="w-full h-full object-cover" />
                   </div>
                 </motion.div>
               )}
@@ -201,7 +208,7 @@ const HeroSection = () => {
                   style={{ bottom: "28%", right: "26%" }}
                 >
                   <div className="w-20 h-20 rounded-full border-[3px] border-accent overflow-hidden bg-background">
-                    <img src={childFace} alt="Child's photo" className="w-full h-full object-cover" />
+                    <img src={currentFace} alt="Child's photo" className="w-full h-full object-cover" />
                   </div>
                 </motion.div>
               )}
