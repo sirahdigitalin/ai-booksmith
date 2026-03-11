@@ -29,7 +29,7 @@ serve(async (req) => {
 
     const systemPrompt = `You are a creative children's story writer for The Printing House, a premium printing company. 
 You create magical, personalized storybooks for children. Your stories are warm, imaginative, age-appropriate, and full of wonder.
-Each story should have exactly 5 pages with vivid descriptions that would make beautiful illustrations.
+Each story should have exactly ${pages} pages with vivid descriptions that would make beautiful illustrations.
 Return ONLY valid JSON with no markdown formatting.`;
 
     const userPrompt = `Create a personalized ${theme} themed storybook for a ${age}-year-old child named ${name}. 
