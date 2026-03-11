@@ -21,8 +21,8 @@ const occasions = ["Birthday", "Christmas", "Graduation", "Just Because", "Weddi
 
 const pageOptions = [
   { pages: 10, label: "10 Pages", pdfPrice: "₹199", printPrice: "₹699" },
+  { pages: 15, label: "15 Pages", pdfPrice: "₹249", printPrice: "₹799" },
   { pages: 20, label: "20 Pages", pdfPrice: "₹299", printPrice: "₹899" },
-  { pages: 30, label: "30 Pages", pdfPrice: "₹399", printPrice: "₹1,199" },
 ];
 
 export interface StoryPage {
