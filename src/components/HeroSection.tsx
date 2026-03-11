@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
+
 import { Sparkles, ArrowRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
