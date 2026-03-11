@@ -153,7 +153,7 @@ const HeroSection = () => {
                 >
                   <div className="relative">
                     <div className="w-20 h-20 rounded-full border-[3px] border-accent shadow-card overflow-hidden bg-background">
-                      <img src={childFace} alt="Child's photo" className="w-full h-full object-cover" />
+                      <img src={currentFace} alt="Child's photo" className="w-full h-full object-cover" />
                     </div>
                     {/* Arrow indicator */}
                     <motion.div
@@ -191,7 +191,7 @@ const HeroSection = () => {
                   className="absolute z-20"
                 >
                   <div className="w-20 h-20 rounded-full border-[3px] border-accent shadow-glow-red overflow-hidden bg-background">
-                    <img src={childFace} alt="Child's photo" className="w-full h-full object-cover" />
+                    <img src={currentFace} alt="Child's photo" className="w-full h-full object-cover" />
                   </div>
                 </motion.div>
               )}
@@ -208,7 +208,7 @@ const HeroSection = () => {
                   style={{ bottom: "28%", right: "26%" }}
                 >
                   <div className="w-20 h-20 rounded-full border-[3px] border-accent overflow-hidden bg-background">
-                    <img src={childFace} alt="Child's photo" className="w-full h-full object-cover" />
+                    <img src={currentFace} alt="Child's photo" className="w-full h-full object-cover" />
                   </div>
                 </motion.div>
               )}
