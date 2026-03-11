@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Sparkles, ArrowRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroBook from "@/assets/hero-book.png";
+import heroBook from "@/assets/hero-book-personalized.png";
 
 const HeroSection = () => {
   return (
@@ -34,28 +34,35 @@ const HeroSection = () => {
             <span className="text-sm font-semibold font-accent">AI-Powered Personalization</span>
           </motion.div>
 
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.5rem] xl:text-6xl font-bold text-foreground leading-[1.1] mb-6 tracking-tight">
-            Create Your{" "}
-            <span className="text-gradient-crimson">Personalized</span>{" "}
-            <span className="text-gradient-blue">Storybook</span>{" "}
-            in 30 Seconds
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.5rem] xl:text-6xl font-bold text-foreground leading-[1.1] mb-4 tracking-tight">
+            More than a{" "}
+            <span className="text-gradient-crimson">Gift!</span>
           </h1>
 
-          <p className="text-lg text-muted-foreground max-w-lg mx-auto lg:mx-0 mb-10 leading-relaxed">
+          <p className="text-xl sm:text-2xl font-display text-muted-foreground mb-6 leading-relaxed">
+            A keepsake they'll treasure for years to come
+          </p>
+
+          <p className="text-base text-muted-foreground max-w-lg mx-auto lg:mx-0 mb-10 leading-relaxed">
             Enter a name, pick a theme, and our AI crafts a unique storybook with
             custom illustrations — ready to print and deliver to your doorstep.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-            <Button
-              size="lg"
-              className="bg-gradient-crimson text-primary-foreground font-semibold px-8 py-6 text-base shadow-glow-red hover:shadow-elevated transition-all duration-300 hover:scale-[1.02]"
-              asChild
-            >
-              <a href="#create-your-book">
-                Create Your Book <ArrowRight size={18} className="ml-2" />
-              </a>
-            </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
+            <div className="flex items-center gap-3">
+              <Button
+                size="lg"
+                className="bg-gradient-crimson text-primary-foreground font-semibold px-8 py-6 text-base shadow-glow-red hover:shadow-elevated transition-all duration-300 hover:scale-[1.02]"
+                asChild
+              >
+                <a href="#create-your-book">
+                  Create Your Book <ArrowRight size={18} className="ml-2" />
+                </a>
+              </Button>
+              <span className="bg-accent text-accent-foreground text-xs font-bold px-3 py-1.5 rounded-full shadow-card animate-pulse">
+                FREE
+              </span>
+            </div>
             <Button
               size="lg"
               variant="outline"
@@ -66,7 +73,11 @@ const HeroSection = () => {
             </Button>
           </div>
 
-          <div className="flex items-center gap-8 mt-10 justify-center lg:justify-start">
+          <p className="text-sm text-muted-foreground mt-4 text-center lg:text-left">
+            ⏱️ Takes only 2 minutes — no account needed
+          </p>
+
+          <div className="flex items-center gap-8 mt-8 justify-center lg:justify-start">
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <div className="flex -space-x-1">
                 {[...Array(5)].map((_, i) => (
@@ -95,7 +106,7 @@ const HeroSection = () => {
             
             <img
               src={heroBook}
-              alt="Magical personalized storybook"
+              alt="Personalized children's storybook - Max's Space Adventure"
               className="relative w-full max-w-md lg:max-w-lg rounded-2xl shadow-elevated transform group-hover:scale-[1.02] group-hover:rotate-1 transition-all duration-700"
             />
 
