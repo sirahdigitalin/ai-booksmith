@@ -21,8 +21,8 @@ const occasions = ["Birthday", "Christmas", "Graduation", "Just Because", "Weddi
 
 const pageOptions = [
   { pages: 10, label: "10 Pages", pdfPrice: "₹199", printPrice: "₹699" },
+  { pages: 15, label: "15 Pages", pdfPrice: "₹249", printPrice: "₹799" },
   { pages: 20, label: "20 Pages", pdfPrice: "₹299", printPrice: "₹899" },
-  { pages: 30, label: "30 Pages", pdfPrice: "₹399", printPrice: "₹1,199" },
 ];
 
 export interface StoryPage {
@@ -43,7 +43,7 @@ const StoryCreator = ({ preselectedTheme, selectedTemplate }: StoryCreatorProps)
   const [isTemplateFlow, setIsTemplateFlow] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState<BookTemplate | null>(null);
   const [form, setForm] = useState({
-    name: "", age: "", phone: "", email: "", theme: "", occasion: "", pageCount: 20,
+    name: "", age: "", phone: "", email: "", theme: "", occasion: "", pageCount: 15,
     address: "", city: "", state: "", pincode: "",
   });
   const [photo, setPhoto] = useState<string | null>(null);
@@ -183,7 +183,7 @@ const StoryCreator = ({ preselectedTheme, selectedTemplate }: StoryCreatorProps)
     setOrderType(null);
     setIsTemplateFlow(false);
     setActiveTemplate(null);
-    setForm({ name: "", age: "", phone: "", email: "", theme: "", occasion: "", pageCount: 20, address: "", city: "", state: "", pincode: "" });
+    setForm({ name: "", age: "", phone: "", email: "", theme: "", occasion: "", pageCount: 15, address: "", city: "", state: "", pincode: "" });
   };
 
   const handleNextFromDetails = () => {
