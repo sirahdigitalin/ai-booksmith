@@ -46,7 +46,7 @@ const StoryCreator = ({ preselectedTheme }: StoryCreatorProps) => {
   useEffect(() => {
     if (preselectedTheme && preselectedTheme !== form.theme) {
       setForm((prev) => ({ ...prev, theme: preselectedTheme }));
-      if (step < 1) setStep(1);
+      // Stay on step 0 so user fills in name, age, photo first
     }
   }, [preselectedTheme]);
 
