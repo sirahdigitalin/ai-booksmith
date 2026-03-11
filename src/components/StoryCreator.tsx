@@ -43,7 +43,7 @@ const StoryCreator = ({ preselectedTheme, selectedTemplate }: StoryCreatorProps)
   const [isTemplateFlow, setIsTemplateFlow] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState<BookTemplate | null>(null);
   const [form, setForm] = useState({
-    name: "", age: "", phone: "", email: "", theme: "", occasion: "", pageCount: 20,
+    name: "", age: "", phone: "", email: "", theme: "", occasion: "", pageCount: 15,
     address: "", city: "", state: "", pincode: "",
   });
   const [photo, setPhoto] = useState<string | null>(null);
