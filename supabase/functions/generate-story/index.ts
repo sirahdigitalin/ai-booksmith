@@ -47,7 +47,7 @@ Return a JSON object with this exact structure:
   ]
 }
 
-Create exactly 5 pages. Make the story magical, personal, and age-appropriate. 
+Create exactly ${pages} pages. Make the story magical, personal, and age-appropriate. 
 Include the child's name naturally throughout the story. 
 End with a warm, happy conclusion tied to the occasion.`;
 
