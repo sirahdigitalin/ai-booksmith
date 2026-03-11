@@ -183,7 +183,7 @@ const StoryCreator = ({ preselectedTheme, selectedTemplate }: StoryCreatorProps)
     setOrderType(null);
     setIsTemplateFlow(false);
     setActiveTemplate(null);
-    setForm({ name: "", age: "", phone: "", email: "", theme: "", occasion: "", pageCount: 20, address: "", city: "", state: "", pincode: "" });
+    setForm({ name: "", age: "", phone: "", email: "", theme: "", occasion: "", pageCount: 15, address: "", city: "", state: "", pincode: "" });
   };
 
   const handleNextFromDetails = () => {
