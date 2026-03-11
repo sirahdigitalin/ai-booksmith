@@ -214,7 +214,7 @@ const StoryCreator = ({ preselectedTheme, selectedTemplate }: StoryCreatorProps)
             </span>
           </div>
 
-          <FlipbookPreview title={storyTitle} pages={story} characterName={form.name} />
+          <FlipbookPreview title={storyTitle} pages={story} characterName={form.name} photo={photo} />
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
             <Button
               onClick={() => { setOrderType("pdf"); setStep(4); }}
