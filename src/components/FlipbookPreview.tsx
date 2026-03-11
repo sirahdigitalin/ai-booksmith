@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
-import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
-import { ChevronLeft, ChevronRight, BookOpen, ShoppingCart, Download, Volume2 } from "lucide-react";
+import { motion, AnimatePresence, PanInfo } from "framer-motion";
+import { ChevronLeft, ChevronRight, BookOpen, ShoppingCart, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { StoryPage } from "./StoryCreator";
 
@@ -8,6 +8,7 @@ interface FlipbookPreviewProps {
   title: string;
   pages: StoryPage[];
   characterName: string;
+  photo?: string | null;
 }
 
 const illustrationBgs = [
@@ -26,7 +27,16 @@ const decorativePatterns = [
   "★ ☆ ★",
 ];
 
-const FlipbookPreview = ({ title, pages, characterName }: FlipbookPreviewProps) => {
+// Pages where the photo appears (1st, middle, last content pages)
+const getPhotoPages = (totalPages: number): Set<number> => {
+  const pages = new Set<number>();
+  pages.add(0); // first page
+  pages.add(Math.floor(totalPages / 2)); // middle page
+  if (totalPages > 2) pages.add(totalPages - 1); // last page
+  return pages;
+};
+
+const FlipbookPreview = ({ title, pages, characterName, photo }: FlipbookPreviewProps) => {
   const [currentPage, setCurrentPage] = useState(-1);
   const [direction, setDirection] = useState(0);
   const [isFlipping, setIsFlipping] = useState(false);
@@ -34,6 +44,7 @@ const FlipbookPreview = ({ title, pages, characterName }: FlipbookPreviewProps) 
   const totalPages = pages.length;
   const isOnCover = currentPage === -1;
   const isOnBack = currentPage === totalPages;
+  const photoPages = getPhotoPages(totalPages);
 
   const goNext = useCallback(() => {
     if (currentPage < totalPages && !isFlipping) {
@@ -98,7 +109,7 @@ const FlipbookPreview = ({ title, pages, characterName }: FlipbookPreviewProps) 
         <p className="text-muted-foreground text-sm font-accent mt-2">Swipe or use arrows to turn pages</p>
       </div>
 
-      {/* Book Container */}
+      {/* Book Container - everything inside */}
       <div className="relative mx-auto" style={{ perspective: "1800px" }}>
         {/* Ambient glow behind book */}
         <div className="absolute -inset-8 bg-gradient-radial from-primary/8 via-transparent to-transparent blur-3xl pointer-events-none" />
@@ -154,22 +165,36 @@ const FlipbookPreview = ({ title, pages, characterName }: FlipbookPreviewProps) 
                   <motion.div
                     animate={{ opacity: [0.5, 1, 0.5] }}
                     transition={{ duration: 3, repeat: Infinity }}
-                    className="text-accent/60 text-xs tracking-[0.5em] font-accent mb-6"
+                    className="text-accent/60 text-xs tracking-[0.5em] font-accent mb-4"
                   >
                     ✦ ✦ ✦
                   </motion.div>
 
-                  <div className="w-28 h-0.5 bg-gradient-to-r from-transparent via-accent to-transparent mb-8" />
+                  <div className="w-28 h-0.5 bg-gradient-to-r from-transparent via-accent to-transparent mb-6" />
 
-                  <h2 className="font-display text-3xl sm:text-5xl font-bold text-center text-secondary-foreground leading-tight mb-4">
+                  {/* Photo on cover */}
+                  {photo && (
+                    <motion.div
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: 0.3 }}
+                      className="mb-5"
+                    >
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-3 border-accent/50 shadow-lg mx-auto">
+                        <img src={photo} alt={characterName} className="w-full h-full object-cover" />
+                      </div>
+                    </motion.div>
+                  )}
+
+                  <h2 className="font-display text-3xl sm:text-5xl font-bold text-center text-secondary-foreground leading-tight mb-3">
                     {title}
                   </h2>
 
-                  <p className="text-secondary-foreground/60 font-accent text-sm mb-8 tracking-wide">
+                  <p className="text-secondary-foreground/60 font-accent text-sm mb-6 tracking-wide">
                     A personalized story for {characterName}
                   </p>
 
-                  <div className="w-28 h-0.5 bg-gradient-to-r from-transparent via-accent to-transparent mb-8" />
+                  <div className="w-28 h-0.5 bg-gradient-to-r from-transparent via-accent to-transparent mb-6" />
 
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-px bg-accent/40" />
@@ -242,7 +267,7 @@ const FlipbookPreview = ({ title, pages, characterName }: FlipbookPreviewProps) 
                     </Button>
                   </div>
 
-                  <p className="text-xs text-primary-foreground/40 font-accent mt-8 tracking-widest uppercase">
+                  <p className="text-xs text-primary-foreground/40 font-accent mt-6 tracking-widest uppercase">
                     Printed by The Printing House
                   </p>
                 </div>
@@ -263,23 +288,39 @@ const FlipbookPreview = ({ title, pages, characterName }: FlipbookPreviewProps) 
                 <div className={`absolute inset-0 bg-gradient-to-br ${illustrationBgs[currentPage % illustrationBgs.length]}`} />
                 <div className="absolute inset-0 bg-card/80" />
 
-                {/* Page content with two-column layout on larger screens */}
+                {/* Page content */}
                 <div className="relative h-full flex flex-col sm:flex-row items-center justify-center p-8 pl-10 sm:p-12 sm:pl-14 gap-6">
-                  {/* Illustration area */}
+                  {/* Illustration or Photo area */}
                   <div className="flex-shrink-0 flex flex-col items-center justify-center">
-                    <motion.div
-                      initial={{ scale: 0.5, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
-                      className="relative"
-                    >
-                      <div className="text-7xl sm:text-8xl relative z-10">
-                        {pages[currentPage].illustration}
-                      </div>
-                      <div className="absolute inset-0 blur-2xl opacity-30 text-7xl sm:text-8xl flex items-center justify-center">
-                        {pages[currentPage].illustration}
-                      </div>
-                    </motion.div>
+                    {photo && photoPages.has(currentPage) ? (
+                      <motion.div
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+                        className="relative"
+                      >
+                        <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-2 border-accent/30 shadow-elevated">
+                          <img src={photo} alt={characterName} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="absolute -bottom-2 -right-2 text-3xl">
+                          {pages[currentPage].illustration}
+                        </div>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+                        className="relative"
+                      >
+                        <div className="text-7xl sm:text-8xl relative z-10">
+                          {pages[currentPage].illustration}
+                        </div>
+                        <div className="absolute inset-0 blur-2xl opacity-30 text-7xl sm:text-8xl flex items-center justify-center">
+                          {pages[currentPage].illustration}
+                        </div>
+                      </motion.div>
+                    )}
                     <motion.p
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -304,7 +345,7 @@ const FlipbookPreview = ({ title, pages, characterName }: FlipbookPreviewProps) 
                   </motion.div>
                 </div>
 
-                {/* Page number with style */}
+                {/* Page number */}
                 <div className="absolute bottom-4 right-6 flex items-center gap-2">
                   <div className="w-6 h-px bg-muted-foreground/20" />
                   <span className="text-xs text-muted-foreground/50 font-accent tracking-wider">
@@ -312,125 +353,132 @@ const FlipbookPreview = ({ title, pages, characterName }: FlipbookPreviewProps) 
                   </span>
                 </div>
 
-                {/* Top-right page fold effect */}
+                {/* Top-right page fold */}
                 <div className="absolute top-0 right-0 w-8 h-8 overflow-hidden">
                   <div className="absolute top-0 right-0 w-12 h-12 bg-gradient-to-bl from-muted/40 to-transparent transform rotate-0 origin-top-right" />
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
-        </motion.div>
-      </div>
 
-      {/* Progress bar */}
-      <div className="mt-8 mx-auto max-w-md">
-        <div className="h-1 bg-muted rounded-full overflow-hidden">
-          <motion.div
-            className="h-full bg-gradient-to-r from-primary via-accent to-secondary rounded-full"
-            animate={{ width: `${Math.max(progressPercent, 2)}%` }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-          />
-        </div>
-      </div>
+          {/* ===== Navigation INSIDE the book ===== */}
+          <div className="absolute inset-0 z-30 pointer-events-none">
+            {/* Left arrow */}
+            <div className="absolute left-2 top-1/2 -translate-y-1/2 pointer-events-auto">
+              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={goPrev}
+                  disabled={isOnCover || isFlipping}
+                  className="rounded-full w-10 h-10 bg-background/70 backdrop-blur-sm border border-border/50 text-foreground hover:bg-background/90 shadow-md disabled:opacity-0 transition-opacity"
+                >
+                  <ChevronLeft size={18} />
+                </Button>
+              </motion.div>
+            </div>
 
-      {/* Navigation */}
-      <div className="flex items-center justify-between mt-6 px-2">
-        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={goPrev}
-            disabled={isOnCover || isFlipping}
-            className="rounded-full w-14 h-14 border-2 border-secondary/50 text-secondary hover:bg-secondary hover:text-secondary-foreground hover:border-secondary transition-all shadow-lg hover:shadow-xl disabled:opacity-30"
-          >
-            <ChevronLeft size={22} />
-          </Button>
-        </motion.div>
+            {/* Right arrow */}
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-auto">
+              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={goNext}
+                  disabled={isOnBack || isFlipping}
+                  className="rounded-full w-10 h-10 bg-background/70 backdrop-blur-sm border border-border/50 text-foreground hover:bg-background/90 shadow-md disabled:opacity-0 transition-opacity"
+                >
+                  <ChevronRight size={18} />
+                </Button>
+              </motion.div>
+            </div>
 
-        {/* Page indicators */}
-        <div className="flex items-center gap-1.5 flex-wrap justify-center max-w-xs">
-          {/* Cover dot */}
-          <button
-            onClick={() => { if (!isFlipping) { setDirection(-1); setCurrentPage(-1); }}}
-            className={`transition-all duration-300 rounded-full ${
-              currentPage === -1
-                ? "w-7 h-3 bg-gradient-to-r from-primary to-secondary"
-                : "w-2.5 h-2.5 bg-muted hover:bg-muted-foreground/40"
-            }`}
-            aria-label="Cover"
-          />
-          {/* Page dots - show max 10 with smart collapsing */}
-          {pages.length <= 12 ? (
-            pages.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => { if (!isFlipping) { setDirection(i > currentPage ? 1 : -1); setCurrentPage(i); }}}
-                className={`transition-all duration-300 rounded-full ${
-                  i === currentPage
-                    ? "w-7 h-3 bg-gradient-to-r from-primary to-accent"
-                    : "w-2.5 h-2.5 bg-muted hover:bg-muted-foreground/40"
-                }`}
-                aria-label={`Page ${i + 1}`}
-              />
-            ))
-          ) : (
-            <>
-              {/* Show first 3, ellipsis, current area, ellipsis, last 3 */}
-              {Array.from({ length: totalPages }, (_, i) => {
-                const showDot = i < 3 || i >= totalPages - 3 ||
-                  (i >= currentPage - 1 && i <= currentPage + 1);
-                const showEllipsis = (i === 3 && currentPage > 4) ||
-                  (i === totalPages - 4 && currentPage < totalPages - 5);
+            {/* Bottom bar: progress + dots + page counter */}
+            <div className="absolute bottom-3 left-6 right-6 pointer-events-auto">
+              {/* Progress bar */}
+              <div className="h-0.5 bg-muted/40 rounded-full overflow-hidden mb-2">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-primary via-accent to-secondary rounded-full"
+                  animate={{ width: `${Math.max(progressPercent, 2)}%` }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                />
+              </div>
 
-                if (showEllipsis) {
-                  return <span key={i} className="text-muted-foreground/30 text-xs px-0.5">•••</span>;
-                }
-                if (!showDot) return null;
-
-                return (
+              <div className="flex items-center justify-between">
+                {/* Page dots */}
+                <div className="flex items-center gap-1 flex-wrap justify-center flex-1">
+                  {/* Cover dot */}
                   <button
-                    key={i}
-                    onClick={() => { if (!isFlipping) { setDirection(i > currentPage ? 1 : -1); setCurrentPage(i); }}}
+                    onClick={() => { if (!isFlipping) { setDirection(-1); setCurrentPage(-1); }}}
                     className={`transition-all duration-300 rounded-full ${
-                      i === currentPage
-                        ? "w-7 h-3 bg-gradient-to-r from-primary to-accent"
-                        : "w-2.5 h-2.5 bg-muted hover:bg-muted-foreground/40"
+                      currentPage === -1
+                        ? "w-5 h-2 bg-gradient-to-r from-primary to-secondary"
+                        : "w-1.5 h-1.5 bg-foreground/20 hover:bg-foreground/40"
                     }`}
-                    aria-label={`Page ${i + 1}`}
+                    aria-label="Cover"
                   />
-                );
-              })}
-            </>
-          )}
-          {/* Back cover dot */}
-          <button
-            onClick={() => { if (!isFlipping) { setDirection(1); setCurrentPage(totalPages); }}}
-            className={`transition-all duration-300 rounded-full ${
-              currentPage === totalPages
-                ? "w-7 h-3 bg-gradient-to-r from-secondary to-primary"
-                : "w-2.5 h-2.5 bg-muted hover:bg-muted-foreground/40"
-            }`}
-            aria-label="Back cover"
-          />
-        </div>
+                  {pages.length <= 12 ? (
+                    pages.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => { if (!isFlipping) { setDirection(i > currentPage ? 1 : -1); setCurrentPage(i); }}}
+                        className={`transition-all duration-300 rounded-full ${
+                          i === currentPage
+                            ? "w-5 h-2 bg-gradient-to-r from-primary to-accent"
+                            : "w-1.5 h-1.5 bg-foreground/20 hover:bg-foreground/40"
+                        }`}
+                        aria-label={`Page ${i + 1}`}
+                      />
+                    ))
+                  ) : (
+                    <>
+                      {Array.from({ length: totalPages }, (_, i) => {
+                        const showDot = i < 3 || i >= totalPages - 3 ||
+                          (i >= currentPage - 1 && i <= currentPage + 1);
+                        const showEllipsis = (i === 3 && currentPage > 4) ||
+                          (i === totalPages - 4 && currentPage < totalPages - 5);
 
-        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={goNext}
-            disabled={isOnBack || isFlipping}
-            className="rounded-full w-14 h-14 border-2 border-secondary/50 text-secondary hover:bg-secondary hover:text-secondary-foreground hover:border-secondary transition-all shadow-lg hover:shadow-xl disabled:opacity-30"
-          >
-            <ChevronRight size={22} />
-          </Button>
+                        if (showEllipsis) {
+                          return <span key={i} className="text-foreground/20 text-[8px] px-0.5">•••</span>;
+                        }
+                        if (!showDot) return null;
+
+                        return (
+                          <button
+                            key={i}
+                            onClick={() => { if (!isFlipping) { setDirection(i > currentPage ? 1 : -1); setCurrentPage(i); }}}
+                            className={`transition-all duration-300 rounded-full ${
+                              i === currentPage
+                                ? "w-5 h-2 bg-gradient-to-r from-primary to-accent"
+                                : "w-1.5 h-1.5 bg-foreground/20 hover:bg-foreground/40"
+                            }`}
+                            aria-label={`Page ${i + 1}`}
+                          />
+                        );
+                      })}
+                    </>
+                  )}
+                  {/* Back cover dot */}
+                  <button
+                    onClick={() => { if (!isFlipping) { setDirection(1); setCurrentPage(totalPages); }}}
+                    className={`transition-all duration-300 rounded-full ${
+                      currentPage === totalPages
+                        ? "w-5 h-2 bg-gradient-to-r from-secondary to-primary"
+                        : "w-1.5 h-1.5 bg-foreground/20 hover:bg-foreground/40"
+                    }`}
+                    aria-label="Back cover"
+                  />
+                </div>
+
+                {/* Page counter */}
+                <span className="text-[10px] text-foreground/40 font-accent tracking-wide ml-3 whitespace-nowrap">
+                  {isOnCover ? "Cover" : isOnBack ? "Back" : `${currentPage + 1}/${totalPages}`}
+                </span>
+              </div>
+            </div>
+          </div>
         </motion.div>
       </div>
-
-      {/* Page counter text */}
-      <p className="text-center text-xs text-muted-foreground font-accent mt-4 tracking-wide">
-        {isOnCover ? "Front Cover" : isOnBack ? "Back Cover" : `Page ${currentPage + 1} of ${totalPages}`}
-      </p>
     </div>
   );
 };
